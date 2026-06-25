@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, Download, Search, FileText } from 'lucide-react'
 import { ItemOrcamento, OrcamentoInput } from '@/lib/types'
@@ -67,8 +67,22 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
     [],
   )
 
-  const addItem = () => setItens((prev) => [...prev, novoItem()])
+  const ultimoItemRef = useRef<HTMLDivElement>(null)
+  const [rolarParaUltimo, setRolarParaUltimo] = useState(false)
+
+  const addItem = () => {
+    setItens((prev) => [...prev, novoItem()])
+    setRolarParaUltimo(true)
+  }
   const removeItem = (id: string) => setItens((prev) => prev.filter((i) => i.id !== id))
+
+  // Ao adicionar um item, rola até ele e foca o primeiro campo
+  useEffect(() => {
+    if (!rolarParaUltimo || !ultimoItemRef.current) return
+    ultimoItemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    ultimoItemRef.current.querySelector('input')?.focus()
+    setRolarParaUltimo(false)
+  }, [rolarParaUltimo])
 
   async function handleBuscarCep() {
     setBuscandoCep(true)
@@ -94,7 +108,9 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
     return {
       cliente, telefone, documento, prazoEntrega,
       cep, endereco, numeroEnd, bairro, cidade, uf,
-      data, itens, subtotal, desconto, total, observacoes, status: 'aberto',
+      data, itens, subtotal, desconto, total, observacoes,
+      // Preserva o status atual ao editar; novos começam como 'aberto'
+      status: initialData?.status ?? 'aberto',
     }
   }
 
@@ -104,7 +120,7 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
     try {
       if (orcamentoId) {
         await atualizarOrcamento(orcamentoId, buildInput())
-        router.refresh()
+        router.push('/')
       } else {
         const id = await criarOrcamento(buildInput())
         router.push(`/orcamento/${id}`)
@@ -328,7 +344,11 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
 
         <div className="space-y-3">
           {itens.map((item, idx) => (
-            <div key={item.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50/50">
+            <div
+              key={item.id}
+              ref={idx === itens.length - 1 ? ultimoItemRef : null}
+              className="border border-gray-200 rounded-lg p-4 bg-gray-50/50"
+            >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-semibold text-gray-400">Item {idx + 1}</span>
                 {itens.length > 1 && (
