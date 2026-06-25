@@ -1,9 +1,9 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, Download } from 'lucide-react'
+import { Plus, Trash2, Download, Search } from 'lucide-react'
 import { ItemOrcamento, OrcamentoInput } from '@/lib/types'
-import { calcArea, calcItemTotal, formatBRL, todayISO } from '@/lib/utils'
+import { calcArea, calcItemTotal, formatBRL, todayISO, buscarCEP } from '@/lib/utils'
 import { criarOrcamento, atualizarOrcamento } from '@/lib/firestore'
 
 function novoItem(): ItemOrcamento {
@@ -31,6 +31,13 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
 
   const [cliente, setCliente] = useState(initialData?.cliente ?? '')
   const [telefone, setTelefone] = useState(initialData?.telefone ?? '')
+  const [cep, setCep] = useState(initialData?.cep ?? '')
+  const [endereco, setEndereco] = useState(initialData?.endereco ?? '')
+  const [numeroEnd, setNumeroEnd] = useState(initialData?.numeroEnd ?? '')
+  const [bairro, setBairro] = useState(initialData?.bairro ?? '')
+  const [cidade, setCidade] = useState(initialData?.cidade ?? '')
+  const [uf, setUf] = useState(initialData?.uf ?? '')
+  const [buscandoCep, setBuscandoCep] = useState(false)
   const [data, setData] = useState(initialData?.data ?? todayISO())
   const [observacoes, setObservacoes] = useState(initialData?.observacoes ?? '')
   const [desconto, setDesconto] = useState(initialData?.desconto ?? 0)
@@ -56,11 +63,31 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
   const addItem = () => setItens((prev) => [...prev, novoItem()])
   const removeItem = (id: string) => setItens((prev) => prev.filter((i) => i.id !== id))
 
+  async function handleBuscarCep() {
+    setBuscandoCep(true)
+    try {
+      const res = await buscarCEP(cep)
+      if (!res) {
+        alert('CEP não encontrado.')
+        return
+      }
+      setEndereco(res.endereco)
+      setBairro(res.bairro)
+      setCidade(res.cidade)
+      setUf(res.uf)
+    } finally {
+      setBuscandoCep(false)
+    }
+  }
+
   const subtotal = itens.reduce((s, i) => s + i.total, 0)
   const total = subtotal - desconto
 
   function buildInput(): OrcamentoInput {
-    return { cliente, telefone, data, itens, subtotal, desconto, total, observacoes, status: 'aberto' }
+    return {
+      cliente, telefone, cep, endereco, numeroEnd, bairro, cidade, uf,
+      data, itens, subtotal, desconto, total, observacoes, status: 'aberto',
+    }
   }
 
   async function handleSave() {
@@ -139,6 +166,86 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
               type="date"
               value={data}
               onChange={(e) => setData(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Endereço */}
+        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-5 mb-3">
+          Endereço
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={cep}
+                onChange={(e) => setCep(e.target.value)}
+                onBlur={() => cep.replace(/\D/g, '').length === 8 && handleBuscarCep()}
+                placeholder="00000-000"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={handleBuscarCep}
+                disabled={buscandoCep}
+                className="shrink-0 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors disabled:opacity-50"
+                title="Buscar CEP"
+              >
+                <Search size={16} />
+              </button>
+            </div>
+          </div>
+          <div className="sm:col-span-3">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rua / Logradouro</label>
+            <input
+              type="text"
+              value={endereco}
+              onChange={(e) => setEndereco(e.target.value)}
+              placeholder={buscandoCep ? 'Buscando...' : 'Rua, avenida...'}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
+            <input
+              type="text"
+              value={numeroEnd}
+              onChange={(e) => setNumeroEnd(e.target.value)}
+              placeholder="123"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+            <input
+              type="text"
+              value={bairro}
+              onChange={(e) => setBairro(e.target.value)}
+              placeholder="Bairro"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="sm:col-span-3">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+            <input
+              type="text"
+              value={cidade}
+              onChange={(e) => setCidade(e.target.value)}
+              placeholder="Cidade"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">UF</label>
+            <input
+              type="text"
+              value={uf}
+              onChange={(e) => setUf(e.target.value.toUpperCase().slice(0, 2))}
+              placeholder="SP"
+              maxLength={2}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

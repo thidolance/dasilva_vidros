@@ -193,6 +193,13 @@ const styles = StyleSheet.create({
 export function OrcamentoPDF({ orcamento }: { orcamento: Orcamento }) {
   const isFechado = orcamento.status === 'fechado'
 
+  // Monta o endereço em uma linha, ignorando campos vazios (orçamentos antigos)
+  const ruaNum = [orcamento.endereco, orcamento.numeroEnd].filter(Boolean).join(', ')
+  const cidadeUf = [orcamento.cidade, orcamento.uf].filter(Boolean).join('/')
+  const linhaEndereco = [ruaNum, orcamento.bairro, cidadeUf, orcamento.cep]
+    .filter(Boolean)
+    .join(' • ')
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -226,6 +233,9 @@ export function OrcamentoPDF({ orcamento }: { orcamento: Orcamento }) {
           <Text style={styles.clienteNome}>{orcamento.cliente}</Text>
           {orcamento.telefone ? (
             <Text style={styles.clienteTel}>Tel: {orcamento.telefone}</Text>
+          ) : null}
+          {linhaEndereco ? (
+            <Text style={styles.clienteTel}>{linhaEndereco}</Text>
           ) : null}
         </View>
 

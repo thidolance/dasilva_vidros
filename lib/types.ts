@@ -16,6 +16,12 @@ export interface Orcamento {
   numero: number
   cliente: string
   telefone: string
+  cep: string
+  endereco: string  // rua/logradouro
+  numeroEnd: string // número da casa
+  bairro: string
+  cidade: string
+  uf: string
   data: string      // YYYY-MM-DD
   itens: ItemOrcamento[]
   subtotal: number
