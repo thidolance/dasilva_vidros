@@ -1,0 +1,21 @@
+import { OrcamentoForm } from '@/components/OrcamentoForm'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+
+export default function NovoOrcamentoPage() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">
+          <Link href="/" className="text-gray-400 hover:text-gray-600 transition-colors">
+            <ArrowLeft size={18} />
+          </Link>
+          <h1 className="font-semibold text-gray-900">Novo Orçamento</h1>
+        </div>
+      </header>
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        <OrcamentoForm />
+      </main>
+    </div>
+  )
+}
