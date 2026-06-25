@@ -59,41 +59,41 @@ export default function GraficosPage() {
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
         {/* Cards do mês */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Card className="p-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+          <Card className="p-3 sm:p-4">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-gray-500 mb-1">Fechados no mês</p>
-                <p className="text-2xl font-bold text-emerald-600">{fechadosMes.length}</p>
+                <p className="text-xl sm:text-2xl font-bold text-emerald-600">{fechadosMes.length}</p>
               </div>
-              <CheckCircle size={18} className="text-emerald-400" />
+              <CheckCircle size={16} className="text-emerald-400" />
             </div>
           </Card>
-          <Card className="p-4">
+          <Card className="p-3 sm:p-4">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-gray-500 mb-1">Em aberto</p>
-                <p className="text-2xl font-bold text-amber-600">{abertosMes.length}</p>
+                <p className="text-xl sm:text-2xl font-bold text-amber-600">{abertosMes.length}</p>
               </div>
-              <Target size={18} className="text-amber-400" />
+              <Target size={16} className="text-amber-400" />
             </div>
           </Card>
-          <Card className="p-4">
+          <Card className="p-3 sm:p-4">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-gray-500 mb-1">Total fechado</p>
-                <p className="text-lg font-bold text-blue-600">{formatBRL(totalFechadoMes)}</p>
+                <p className="text-sm sm:text-lg font-bold text-blue-600">{formatBRL(totalFechadoMes)}</p>
               </div>
-              <DollarSign size={18} className="text-blue-400" />
+              <DollarSign size={16} className="text-blue-400" />
             </div>
           </Card>
-          <Card className="p-4">
+          <Card className="p-3 sm:p-4">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-gray-500 mb-1">Ticket médio</p>
-                <p className="text-lg font-bold text-violet-600">{formatBRL(ticketMedio)}</p>
+                <p className="text-sm sm:text-lg font-bold text-violet-600">{formatBRL(ticketMedio)}</p>
               </div>
-              <TrendingUp size={18} className="text-violet-400" />
+              <TrendingUp size={16} className="text-violet-400" />
             </div>
           </Card>
         </div>

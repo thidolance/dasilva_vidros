@@ -48,20 +48,21 @@ export default function HomePage() {
             </div>
             <span className="font-bold text-gray-900">DaSilva Vidros</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => router.push('/graficos')}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <BarChart2 size={15} />
-              Gráficos
+              <span className="hidden sm:inline">Gráficos</span>
             </button>
             <button
               onClick={() => router.push('/orcamento/novo')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus size={15} />
-              Novo orçamento
+              <span className="hidden sm:inline">Novo orçamento</span>
+              <span className="sm:hidden">Novo</span>
             </button>
             <form action={logout}>
               <button type="submit" className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors" title="Sair">
@@ -73,18 +74,18 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-5">
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
             <p className="text-xs text-gray-500 mb-1">Em aberto</p>
-            <p className="text-2xl font-bold text-amber-600">{totalAbertos}</p>
+            <p className="text-xl sm:text-2xl font-bold text-amber-600">{totalAbertos}</p>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
             <p className="text-xs text-gray-500 mb-1">Fechados</p>
-            <p className="text-2xl font-bold text-emerald-600">{totalFechados}</p>
+            <p className="text-xl sm:text-2xl font-bold text-emerald-600">{totalFechados}</p>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
             <p className="text-xs text-gray-500 mb-1">Total fechado</p>
-            <p className="text-xl font-bold text-blue-600">
+            <p className="text-sm sm:text-xl font-bold text-blue-600">
               {valorFechados.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </p>
           </div>

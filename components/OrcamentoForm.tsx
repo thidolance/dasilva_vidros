@@ -155,7 +155,7 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-5 px-5">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
