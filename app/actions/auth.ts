@@ -4,9 +4,10 @@ import { validateCredentials } from '@/lib/auth'
 import { encryptSession, setSessionCookie, deleteSessionCookie } from '@/lib/session'
 
 export async function login(_: unknown, formData: FormData) {
+  const usuario = formData.get('usuario') as string
   const password = formData.get('password') as string
 
-  if (!validateCredentials(password)) {
+  if (!validateCredentials(usuario, password)) {
     return { error: 'Senha incorreta.' }
   }
 
