@@ -16,12 +16,14 @@ export interface Orcamento {
   numero: number
   cliente: string
   telefone: string
+  documento: string // CPF ou CNPJ do cliente (opcional; exigido p/ contrato)
   cep: string
   endereco: string  // rua/logradouro
   numeroEnd: string // número da casa
   bairro: string
   cidade: string
   uf: string
+  prazoEntrega: string // ex: "30 dias úteis"
   data: string      // YYYY-MM-DD
   itens: ItemOrcamento[]
   subtotal: number

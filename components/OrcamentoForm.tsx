@@ -1,7 +1,7 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, Download, Search } from 'lucide-react'
+import { Plus, Trash2, Download, Search, FileText } from 'lucide-react'
 import { ItemOrcamento, OrcamentoInput } from '@/lib/types'
 import { calcArea, calcItemTotal, formatBRL, todayISO, buscarCEP } from '@/lib/utils'
 import { criarOrcamento, atualizarOrcamento } from '@/lib/firestore'
@@ -28,9 +28,12 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [emitindo, setEmitindo] = useState(false)
 
   const [cliente, setCliente] = useState(initialData?.cliente ?? '')
   const [telefone, setTelefone] = useState(initialData?.telefone ?? '')
+  const [documento, setDocumento] = useState(initialData?.documento ?? '')
+  const [prazoEntrega, setPrazoEntrega] = useState(initialData?.prazoEntrega ?? '')
   const [cep, setCep] = useState(initialData?.cep ?? '')
   const [endereco, setEndereco] = useState(initialData?.endereco ?? '')
   const [numeroEnd, setNumeroEnd] = useState(initialData?.numeroEnd ?? '')
@@ -85,7 +88,8 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
 
   function buildInput(): OrcamentoInput {
     return {
-      cliente, telefone, cep, endereco, numeroEnd, bairro, cidade, uf,
+      cliente, telefone, documento, prazoEntrega,
+      cep, endereco, numeroEnd, bairro, cidade, uf,
       data, itens, subtotal, desconto, total, observacoes, status: 'aberto',
     }
   }
@@ -130,6 +134,36 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
     }
   }
 
+  async function handleEmitirContrato() {
+    if (!orcamentoId) {
+      alert('Salve o orçamento antes de emitir o contrato.')
+      return
+    }
+    if (!documento.trim()) {
+      alert('Informe o CPF ou CNPJ do cliente para emitir o contrato.')
+      return
+    }
+    setEmitindo(true)
+    try {
+      const res = await fetch(`/api/contrato/${orcamentoId}`)
+      if (!res.ok) {
+        const erro = await res.json().catch(() => null)
+        throw new Error(erro?.error ?? 'Erro ao gerar contrato')
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `contrato-${orcamentoId}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao gerar contrato')
+    } finally {
+      setEmitindo(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Dados do cliente */}
@@ -157,6 +191,29 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
               value={telefone}
               onChange={(e) => setTelefone(e.target.value)}
               placeholder="(11) 99999-9999"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              CPF / CNPJ
+              <span className="text-gray-400 font-normal"> (exigido p/ contrato)</span>
+            </label>
+            <input
+              type="text"
+              value={documento}
+              onChange={(e) => setDocumento(e.target.value)}
+              placeholder="000.000.000-00"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Prazo de entrega</label>
+            <input
+              type="text"
+              value={prazoEntrega}
+              onChange={(e) => setPrazoEntrega(e.target.value)}
+              placeholder="Ex: 30 dias úteis"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -389,7 +446,7 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
       </div>
 
       {/* Ações */}
-      <div className="flex gap-3 justify-end">
+      <div className="flex flex-wrap gap-3 justify-end">
         {orcamentoId && (
           <button
             onClick={handleDownloadPDF}
@@ -398,6 +455,17 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
           >
             <Download size={16} />
             {downloading ? 'Gerando...' : 'Baixar PDF'}
+          </button>
+        )}
+        {orcamentoId && (
+          <button
+            onClick={handleEmitirContrato}
+            disabled={emitindo}
+            title={!documento.trim() ? 'Preencha o CPF/CNPJ do cliente' : 'Emitir contrato'}
+            className="flex items-center gap-2 px-4 py-2.5 border border-blue-300 bg-blue-50 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50"
+          >
+            <FileText size={16} />
+            {emitindo ? 'Gerando...' : 'Emitir Contrato'}
           </button>
         )}
         <button
