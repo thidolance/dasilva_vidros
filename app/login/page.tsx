@@ -1,7 +1,7 @@
 'use client'
 import { useActionState } from 'react'
 import { login } from '@/app/actions/auth'
-import { GlassWater } from 'lucide-react'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(login, undefined)
@@ -10,11 +10,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-4">
-            <GlassWater size={28} className="text-white" />
-          </div>
-          <h1 className="text-xl font-bold text-gray-900">Vidracaria Da Silva</h1>
-          <p className="text-sm text-gray-500 mt-1">Sistema de Orçamentos</p>
+          <Image src="/logo.png" alt="DaSilva Vidros" width={180} height={72} className="h-20 w-auto mb-2" priority />
+          <p className="text-sm text-gray-500">Sistema de Orçamentos</p>
         </div>
 
         <form action={action} className="space-y-4">

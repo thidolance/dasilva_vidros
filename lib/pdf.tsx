@@ -1,6 +1,7 @@
 import {
-  Document, Page, Text, View, StyleSheet, Font,
+  Document, Page, Text, View, StyleSheet, Font, Image as PDFImage,
 } from '@react-pdf/renderer'
+import path from 'path'
 import { Orcamento } from './types'
 import { formatBRL, formatDate, formatNumeroOrcamento } from './utils'
 
@@ -22,10 +23,10 @@ const styles = StyleSheet.create({
   empresa: {
     gap: 2,
   },
-  empresaNome: {
-    fontSize: 18,
-    fontFamily: 'Helvetica-Bold',
-    color: '#2563eb',
+  empresaLogo: {
+    width: 120,
+    height: 48,
+    objectFit: 'contain',
   },
   empresaSub: {
     fontSize: 9,
@@ -198,9 +199,11 @@ export function OrcamentoPDF({ orcamento }: { orcamento: Orcamento }) {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.empresa}>
-            <Text style={styles.empresaNome}>Vidracaria Da Silva</Text>
+            <PDFImage
+              style={styles.empresaLogo}
+              src={path.join(process.cwd(), 'public', 'logo.png')}
+            />
             <Text style={styles.empresaSub}>Vidros • Espelhos • Temperados</Text>
-            <Text style={styles.empresaSub}>contato@dasilvavidros.com.br</Text>
           </View>
           <View style={styles.orcamentoInfo}>
             <Text style={styles.orcamentoNumero}>

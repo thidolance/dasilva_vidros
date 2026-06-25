@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, BarChart2, LogOut, Search, GlassWater } from 'lucide-react'
+import { Plus, BarChart2, LogOut, Search } from 'lucide-react'
+import Image from 'next/image'
 import { listarOrcamentos60Dias } from '@/lib/firestore'
 import { Orcamento } from '@/lib/types'
 import { OrcamentoCard } from '@/components/OrcamentoCard'
@@ -42,11 +43,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <GlassWater size={16} className="text-white" />
-            </div>
-            <span className="font-bold text-gray-900">DaSilva Vidros</span>
+          <div className="flex items-center">
+            <Image src="/logo.png" alt="DaSilva Vidros" width={120} height={48} className="h-10 w-auto" priority />
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
