@@ -3,18 +3,23 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, Download, Search, FileText } from 'lucide-react'
 import { ItemOrcamento, OrcamentoInput } from '@/lib/types'
-import { calcArea, calcItemTotal, formatBRL, todayISO, buscarCEP } from '@/lib/utils'
+import {
+  calcItemTotal, formatBRL, todayISO, buscarCEP,
+  ESPESSURAS, COLORACOES, LADOS_IMPRESSAO,
+} from '@/lib/utils'
 import { criarOrcamento, atualizarOrcamento } from '@/lib/firestore'
 
 function novoItem(): ItemOrcamento {
   return {
     id: `${Date.now()}_${Math.random().toString(36).slice(2)}`,
     descricao: '',
+    espessura: '',
+    coloracao: '',
+    ladoImpresso: '',
     largura: 0,
     altura: 0,
     quantidade: 1,
-    precoM2: 0,
-    area: 0,
+    valor: 0,
     total: 0,
   }
 }
@@ -54,9 +59,8 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
         prev.map((item) => {
           if (item.id !== id) return item
           const updated = { ...item, [campo]: valor }
-          const area = calcArea(Number(updated.largura), Number(updated.altura))
-          const total = calcItemTotal(area, Number(updated.quantidade), Number(updated.precoM2))
-          return { ...updated, area, total }
+          const total = calcItemTotal(Number(updated.valor), Number(updated.quantidade))
+          return { ...updated, total }
         }),
       )
     },
@@ -322,90 +326,134 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
           </button>
         </div>
 
-        <div className="overflow-x-auto -mx-5 px-5">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left py-2 pr-3 font-medium text-gray-500 min-w-[180px]">
-                  Descrição
-                </th>
-                <th className="text-right py-2 px-2 font-medium text-gray-500 w-20">
-                  Larg. (cm)
-                </th>
-                <th className="text-right py-2 px-2 font-medium text-gray-500 w-20">
-                  Alt. (cm)
-                </th>
-                <th className="text-right py-2 px-2 font-medium text-gray-500 w-16">Qtd</th>
-                <th className="text-right py-2 px-2 font-medium text-gray-500 w-24">R$/m²</th>
-                <th className="text-right py-2 pl-2 font-medium text-gray-500 w-20">Área m²</th>
-                <th className="text-right py-2 pl-2 font-medium text-gray-500 w-24">Total</th>
-                <th className="w-8" />
-              </tr>
-            </thead>
-            <tbody>
-              {itens.map((item) => (
-                <tr key={item.id} className="border-b border-gray-50">
-                  <td className="py-2 pr-3">
-                    <input
-                      type="text"
-                      value={item.descricao}
-                      onChange={(e) => recalcItem(item.id, 'descricao', e.target.value)}
-                      placeholder="Ex: Vidro temperado 8mm"
-                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </td>
-                  <td className="py-2 px-2">
-                    <input
-                      type="number"
-                      min="0"
-                      value={item.largura || ''}
-                      onChange={(e) => recalcItem(item.id, 'largura', e.target.value)}
-                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </td>
-                  <td className="py-2 px-2">
-                    <input
-                      type="number"
-                      min="0"
-                      value={item.altura || ''}
-                      onChange={(e) => recalcItem(item.id, 'altura', e.target.value)}
-                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </td>
-                  <td className="py-2 px-2">
-                    <input
-                      type="number"
-                      min="1"
-                      value={item.quantidade}
-                      onChange={(e) => recalcItem(item.id, 'quantidade', e.target.value)}
-                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </td>
-                  <td className="py-2 px-2">
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={item.precoM2 || ''}
-                      onChange={(e) => recalcItem(item.id, 'precoM2', e.target.value)}
-                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </td>
-                  <td className="py-2 pl-2 text-right text-gray-500">{item.area.toFixed(4)}</td>
-                  <td className="py-2 pl-2 text-right font-medium">{formatBRL(item.total)}</td>
-                  <td className="py-2 pl-2">
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-gray-300 hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-3">
+          {itens.map((item, idx) => (
+            <div key={item.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50/50">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-gray-400">Item {idx + 1}</span>
+                {itens.length > 1 && (
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="text-gray-300 hover:text-red-500 transition-colors"
+                    title="Remover item"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                )}
+              </div>
+
+              {/* Descrição */}
+              <div className="mb-3">
+                <label className="block text-xs font-medium text-gray-500 mb-1">Descrição</label>
+                <input
+                  type="text"
+                  value={item.descricao}
+                  onChange={(e) => recalcItem(item.id, 'descricao', e.target.value)}
+                  placeholder="Ex: Box de banheiro, janela, porta..."
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Espessura, coloração, lado impresso */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Espessura</label>
+                  <select
+                    value={item.espessura}
+                    onChange={(e) => recalcItem(item.id, 'espessura', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">Selecione</option>
+                    {ESPESSURAS.map((e) => (
+                      <option key={e} value={e}>{e}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Coloração</label>
+                  <input
+                    type="text"
+                    list="coloracoes"
+                    value={item.coloracao}
+                    onChange={(e) => recalcItem(item.id, 'coloracao', e.target.value)}
+                    placeholder="Incolor, bronze..."
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Vidro impresso</label>
+                  <select
+                    value={item.ladoImpresso}
+                    onChange={(e) => recalcItem(item.id, 'ladoImpresso', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">Não se aplica</option>
+                    {LADOS_IMPRESSAO.map((l) => (
+                      <option key={l} value={l}>{l}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Largura, altura, qtd, valor, total */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Largura (cm)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={item.largura || ''}
+                    onChange={(e) => recalcItem(item.id, 'largura', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Altura (cm)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={item.altura || ''}
+                    onChange={(e) => recalcItem(item.id, 'altura', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Qtd</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={item.quantidade}
+                    onChange={(e) => recalcItem(item.id, 'quantidade', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Valor unit. (R$)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={item.valor || ''}
+                    onChange={(e) => recalcItem(item.id, 'valor', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Total</label>
+                  <div className="px-3 py-2 text-sm text-right font-semibold text-gray-900">
+                    {formatBRL(item.total)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        <datalist id="coloracoes">
+          {COLORACOES.map((c) => (
+            <option key={c} value={c} />
+          ))}
+        </datalist>
 
         {/* Totais */}
         <div className="mt-4 flex justify-end">
@@ -416,14 +464,19 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
             </div>
             <div className="flex items-center justify-between text-sm text-gray-600">
               <span>Desconto (R$)</span>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={desconto || ''}
-                onChange={(e) => setDesconto(Number(e.target.value))}
-                className="w-28 px-2 py-1 border border-gray-200 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
+              <div className="flex items-center gap-1">
+                {desconto > 0 && <span className="text-red-500 font-medium">−</span>}
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={desconto || ''}
+                  onChange={(e) => setDesconto(Number(e.target.value))}
+                  className={`w-24 px-2 py-1 border border-gray-200 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                    desconto > 0 ? 'text-red-500 font-medium' : ''
+                  }`}
+                />
+              </div>
             </div>
             <div className="flex justify-between text-base font-bold border-t border-gray-200 pt-2 mt-2">
               <span>TOTAL</span>

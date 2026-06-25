@@ -193,8 +193,11 @@ export function ContratoPDF({ orcamento }: { orcamento: Orcamento }) {
         </Text>
         {orcamento.itens.map((item, i) => (
           <Text key={item.id} style={styles.itemLinha}>
-            {i + 1}. {item.descricao} — {item.largura} × {item.altura} cm — Qtd: {item.quantidade}{' '}
-            — {formatBRL(item.total)}
+            {i + 1}. {item.descricao}
+            {item.espessura ? ` — ${item.espessura}` : ''}
+            {item.coloracao ? ` — ${item.coloracao}` : ''}
+            {item.ladoImpresso ? ` — impresso ${item.ladoImpresso.toLowerCase()}` : ''}
+            {' '}— {item.largura} × {item.altura} cm — Qtd: {item.quantidade} — {formatBRL(item.total)}
           </Text>
         ))}
 

@@ -94,11 +94,12 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#374151',
   },
-  colDescricao: { flex: 3 },
+  colDescricao: { flex: 2.6 },
+  colEsp: { flex: 0.9, textAlign: 'center' },
+  colCor: { flex: 1.1 },
   colDim: { flex: 1.2, textAlign: 'right' },
-  colQtd: { width: 32, textAlign: 'center' },
-  colArea: { flex: 1, textAlign: 'right' },
-  colPreco: { flex: 1.2, textAlign: 'right' },
+  colQtd: { width: 28, textAlign: 'center' },
+  colValor: { flex: 1.3, textAlign: 'right' },
   colTotal: { flex: 1.4, textAlign: 'right' },
   totaisBox: {
     marginTop: 12,
@@ -242,25 +243,33 @@ export function OrcamentoPDF({ orcamento }: { orcamento: Orcamento }) {
         {/* Tabela */}
         <View style={styles.tableHeader}>
           <Text style={[styles.tableHeaderText, styles.colDescricao]}>Descrição</Text>
+          <Text style={[styles.tableHeaderText, styles.colEsp]}>Esp.</Text>
+          <Text style={[styles.tableHeaderText, styles.colCor]}>Cor</Text>
           <Text style={[styles.tableHeaderText, styles.colDim]}>L × A (cm)</Text>
           <Text style={[styles.tableHeaderText, styles.colQtd]}>Qtd</Text>
-          <Text style={[styles.tableHeaderText, styles.colArea]}>Área m²</Text>
-          <Text style={[styles.tableHeaderText, styles.colPreco]}>R$/m²</Text>
+          <Text style={[styles.tableHeaderText, styles.colValor]}>Valor un.</Text>
           <Text style={[styles.tableHeaderText, styles.colTotal]}>Total</Text>
         </View>
 
-        {orcamento.itens.map((item, i) => (
-          <View key={item.id} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]}>
-            <Text style={[styles.tableText, styles.colDescricao]}>{item.descricao}</Text>
-            <Text style={[styles.tableText, styles.colDim]}>
-              {item.largura} × {item.altura}
-            </Text>
-            <Text style={[styles.tableText, styles.colQtd]}>{item.quantidade}</Text>
-            <Text style={[styles.tableText, styles.colArea]}>{item.area.toFixed(4)}</Text>
-            <Text style={[styles.tableText, styles.colPreco]}>{formatBRL(item.precoM2)}</Text>
-            <Text style={[styles.tableText, styles.colTotal]}>{formatBRL(item.total)}</Text>
-          </View>
-        ))}
+        {orcamento.itens.map((item, i) => {
+          // Lado da impressão entra como nota abaixo da descrição, se houver
+          const desc = item.ladoImpresso
+            ? `${item.descricao} (impresso: ${item.ladoImpresso.toLowerCase()})`
+            : item.descricao
+          return (
+            <View key={item.id} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]}>
+              <Text style={[styles.tableText, styles.colDescricao]}>{desc}</Text>
+              <Text style={[styles.tableText, styles.colEsp]}>{item.espessura}</Text>
+              <Text style={[styles.tableText, styles.colCor]}>{item.coloracao}</Text>
+              <Text style={[styles.tableText, styles.colDim]}>
+                {item.largura} × {item.altura}
+              </Text>
+              <Text style={[styles.tableText, styles.colQtd]}>{item.quantidade}</Text>
+              <Text style={[styles.tableText, styles.colValor]}>{formatBRL(item.valor)}</Text>
+              <Text style={[styles.tableText, styles.colTotal]}>{formatBRL(item.total)}</Text>
+            </View>
+          )
+        })}
 
         {/* Totais */}
         <View style={styles.totaisBox}>

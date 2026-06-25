@@ -13,13 +13,14 @@ export function formatNumeroOrcamento(numero: number): string {
   return String(numero).padStart(3, '0')
 }
 
-export function calcArea(largura: number, altura: number): number {
-  return Number(((largura * altura) / 10000).toFixed(4))
+export function calcItemTotal(valor: number, quantidade: number): number {
+  return Number((valor * quantidade).toFixed(2))
 }
 
-export function calcItemTotal(area: number, quantidade: number, precoM2: number): number {
-  return Number((area * quantidade * precoM2).toFixed(2))
-}
+// Opções fixas para os campos de item.
+export const ESPESSURAS = ['4mm', '6mm', '8mm', '10mm']
+export const COLORACOES = ['Incolor', 'Bronze', 'Fumê', 'Verde']
+export const LADOS_IMPRESSAO = ['Deste lado', 'Lado oposto']
 
 export function formatDate(isoDate: string): string {
   const [year, month, day] = isoDate.split('-')

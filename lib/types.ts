@@ -3,12 +3,14 @@ import { Timestamp } from 'firebase/firestore'
 export interface ItemOrcamento {
   id: string
   descricao: string
-  largura: number   // cm
-  altura: number    // cm
+  espessura: string    // 4mm, 6mm, 8mm, 10mm
+  coloracao: string    // incolor, bronze, fumê, verde ou outro
+  ladoImpresso: string // '', 'Deste lado', 'Lado oposto'
+  largura: number      // cm
+  altura: number       // cm
   quantidade: number
-  precoM2: number   // R$ por m²
-  area: number      // m² calculado
-  total: number     // calculado
+  valor: number        // valor unitário em R$
+  total: number        // valor * quantidade
 }
 
 export interface Orcamento {
