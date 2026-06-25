@@ -74,6 +74,9 @@ export function OrcamentoForm({ orcamentoId, initialData }: Props) {
         const id = await criarOrcamento(buildInput())
         router.push(`/orcamento/${id}`)
       }
+    } catch (err) {
+      console.error(err)
+      alert(`Erro ao salvar: ${err instanceof Error ? err.message : 'Verifique as configurações do Firebase.'}`)
     } finally {
       setSaving(false)
     }
